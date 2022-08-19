@@ -17,15 +17,15 @@ func TestConfig(t *testing.T) {
 		}{
 			"Default": {
 				expected: &Config{
-					Projects: make([]*Project, 0),
+					Projects: make(map[string]*Project, 0),
 				},
 				source:    nil,
 				willError: false,
 			},
 			"FromBytes": {
 				expected: &Config{
-					Projects: []*Project{
-						{
+					Projects: map[string]*Project{
+						"/some/path/to/repo/docs/adr": {
 							Name:      "Example",
 							Directory: "/some/path/to/repo/docs/adr",
 							Template:  "~/.config/adr/templates/default.tpl",
@@ -63,8 +63,8 @@ func TestConfig(t *testing.T) {
 		}()
 
 		cnf := &Config{
-			Projects: []*Project{
-				{
+			Projects: map[string]*Project{
+				cwd: {
 					Name:      "Valid",
 					Directory: cwd,
 					Template:  "default.tpl",

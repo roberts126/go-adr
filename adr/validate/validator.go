@@ -1,11 +1,11 @@
 package validate
 
-var allFunctions = map[string]Func{
+var allValidators = map[string]ValidatorFunc{
 	"match": Match,
 }
 
-// Func represents a constructor for a struct that implements the Validator interface.
-type Func func(string, ...string) (Validator, error)
+// ValidatorFunc represents a constructor for a struct that implements the Validator interface.
+type ValidatorFunc func(string, ...string) (Validator, error)
 
 // Validator represents an object that can validate a value against a criteria.
 type Validator interface {
@@ -13,14 +13,27 @@ type Validator interface {
 	SetMessage(string)
 }
 
-// GetFunction looks for the specified key and returns the Func if found.
-func GetFunction(key string) Func {
-	v, ok := allFunctions[key]
+// GetValidatorFunction looks for the specified key and returns the ValidatorFunc if found.
+func GetValidatorFunction(key string) ValidatorFunc {
+	v, ok := allValidators[key]
 	if !ok {
 		return nil
 	}
 
 	return v
+}
+
+// ListValidatorFunctions returns a list of function names
+func ListValidatorFunctions() []string {
+	f := make([]string, len(allValidators))
+	i := 0
+
+	for k := range allValidators {
+		f[i] = k
+		i++
+	}
+
+	return f
 }
 
 // All validates all of the listed Validator objects.

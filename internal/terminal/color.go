@@ -1,126 +1,82 @@
 package terminal
 
-import (
-	"io"
-	"os"
+import "github.com/fatih/color"
 
-	"github.com/fatih/color"
+const (
+	ColorDefault Color = iota
+	ColorDefaultInverse
+	ColorDefaultAlt
+	ColorError
+	ColorErrorAlt
+	ColorInfo
+	ColorInfoInverse
+	ColorInfoAlt
+	ColorPanic
+	ColorSuccess
+	ColorSuccessInverse
+	ColorSuccessAlt
+	ColorStandard
+	ColorStandardAlt
+	ColorWarn
+	ColorWarnInverse
+	ColorWarnAlt
 )
 
 var (
-	colorError       = color.New(color.FgHiRed, color.Bold)
-	colorErrorAlt    = color.New(color.FgRed, color.Bold)
-	colorInfo        = color.New(color.FgHiCyan, color.Bold)
-	colorInfoAlt     = color.New(color.FgCyan, color.Bold)
-	colorPanic       = color.New(color.BgRed, color.FgHiWhite, color.Bold)
-	colorSuccess     = color.New(color.FgHiGreen, color.Bold)
-	colorSuccessAlt  = color.New(color.FgGreen, color.Bold)
-	colorStandard    = color.New(color.FgHiWhite, color.Bold)
-	colorStandardAlt = color.New(color.FgWhite, color.Bold)
-	colorWarn        = color.New(color.FgYellow, color.Bold)
-	colorWarnAlt     = color.New(color.FgHiYellow, color.Bold)
-
-	exitFunc func(int)
-	writer   io.Writer
+	colorDefault        = color.New(color.FgHiWhite, color.Bold)
+	colorDefaultInverse = color.New(color.BgHiWhite, color.FgBlack, color.Bold)
+	colorDefaultAlt     = color.New(color.FgWhite, color.Bold)
+	colorError          = color.New(color.FgHiRed, color.Bold)
+	colorErrorAlt       = color.New(color.FgRed, color.Bold)
+	colorInfo           = color.New(color.FgHiCyan, color.Bold)
+	colorInfoInverse    = color.New(color.BgHiCyan, color.FgWhite, color.Bold)
+	colorInfoAlt        = color.New(color.FgCyan, color.Bold)
+	colorPanic          = color.New(color.BgRed, color.FgHiWhite, color.Bold)
+	colorSuccess        = color.New(color.FgHiGreen, color.Bold)
+	colorSuccessInverse = color.New(color.BgHiGreen, color.FgHiWhite, color.Bold)
+	colorSuccessAlt     = color.New(color.FgGreen, color.Bold)
+	colorStandard       = color.New(color.FgHiWhite, color.Bold)
+	colorStandardAlt    = color.New(color.FgWhite, color.Bold)
+	colorWarn           = color.New(color.FgYellow, color.Bold)
+	colorWarnInverse    = color.New(color.BgYellow, color.FgBlack, color.Bold)
+	colorWarnAlt        = color.New(color.FgHiYellow, color.Bold)
 )
 
-func init() {
-	SetExitFunc(os.Exit)
-	SetWriter(os.Stdout)
+var colors = map[Color]*color.Color{
+	ColorDefault:        colorDefault,
+	ColorDefaultAlt:     colorDefaultAlt,
+	ColorDefaultInverse: colorDefaultInverse,
+	ColorError:          colorError,
+	ColorErrorAlt:       colorErrorAlt,
+	ColorInfo:           colorInfo,
+	ColorInfoAlt:        colorInfoAlt,
+	ColorInfoInverse:    colorInfoInverse,
+	ColorPanic:          colorPanic,
+	ColorSuccess:        colorSuccess,
+	ColorSuccessAlt:     colorSuccessAlt,
+	ColorSuccessInverse: colorSuccessInverse,
+	ColorStandard:       colorStandard,
+	ColorStandardAlt:    colorStandardAlt,
+	ColorWarn:           colorWarn,
+	ColorWarnInverse:    colorWarnInverse,
+	ColorWarnAlt:        colorWarnAlt,
 }
 
-func SetExitFunc(f func(int)) {
-	exitFunc = f
+type Color int
+
+func GetColor(c Color) *color.Color {
+	return getColor(c, colorDefault)
 }
 
-func SetWriter(w io.Writer) {
-	writer = w
+func GetAltColor(c Color) *color.Color {
+	return getColor(c, colorDefaultAlt)
 }
 
-func Error(args ...interface{}) {
-	_, _ = colorError.Fprintln(writer, args...)
-}
-
-func Errorf(format string, args ...interface{}) {
-	_, _ = colorError.Fprintf(writer, format, args...)
-}
-
-func ErrorZebra(args ...interface{}) {
-	zebraStripe(colorError, colorErrorAlt, args...)
-}
-
-func Info(args ...interface{}) {
-	_, _ = colorInfo.Fprintln(writer, args...)
-}
-
-func Infof(format string, args ...interface{}) {
-	_, _ = colorInfo.Fprintf(writer, format, args...)
-}
-
-func InfoAlt(args ...interface{}) {
-	_, _ = colorInfoAlt.Fprintln(writer, args...)
-}
-
-func InfoAltf(format string, args ...interface{}) {
-	_, _ = colorInfoAlt.Fprintf(writer, format, args...)
-}
-
-func InfoZebra(args ...interface{}) {
-	zebraStripe(colorInfo, colorInfoAlt, args...)
-}
-
-func Panic(args ...interface{}) {
-	_, _ = colorPanic.Fprintln(writer, args...)
-	exitFunc(1)
-}
-
-func Panicf(format string, args ...interface{}) {
-	_, _ = colorPanic.Fprintf(writer, format, args...)
-	exitFunc(1)
-}
-
-func Standard(args ...interface{}) {
-	_, _ = colorStandard.Fprintln(writer, args...)
-}
-
-func Standardf(format string, args ...interface{}) {
-	_, _ = colorStandard.Fprintf(writer, format, args...)
-}
-
-func StandardZebra(args ...interface{}) {
-	zebraStripe(colorStandard, colorStandardAlt, args...)
-}
-
-func Success(args ...interface{}) {
-	_, _ = colorSuccess.Fprintln(writer, args...)
-}
-
-func Successf(format string, args ...interface{}) {
-	_, _ = colorSuccess.Fprintf(writer, format, args...)
-}
-
-func SuccessZebra(args ...interface{}) {
-	zebraStripe(colorSuccess, colorSuccessAlt, args...)
-}
-
-func Warn(args ...interface{}) {
-	_, _ = colorWarn.Fprintln(writer, args...)
-}
-
-func Warnf(format string, args ...interface{}) {
-	_, _ = colorWarn.Fprintf(writer, format, args...)
-}
-
-func WarnZebra(args ...interface{}) {
-	zebraStripe(colorWarn, colorWarnAlt, args...)
-}
-
-func zebraStripe(primary, secondary *color.Color, args ...interface{}) {
-	for i := 0; i < len(args); i++ {
-		if i%2 == 0 {
-			_, _ = primary.Fprintln(writer, args[i])
-		} else {
-			_, _ = secondary.Fprintln(writer, args[i])
-		}
+func getColor(c Color, d *color.Color) *color.Color {
+	c2, ok := colors[c]
+	if !ok {
+		c2 = d
 	}
+
+	return c2
 }

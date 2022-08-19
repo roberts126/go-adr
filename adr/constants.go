@@ -1,38 +1,44 @@
 package adr
 
+// ExampleConfiguration is an example config used in the init commands and testing.
 const ExampleConfiguration = `# ---
 # projects:
-#   - name: Example
-#     directory: /some/path/to/repo/docs/adr
+#   '/some/path/to/repo/docs/adr':
+#     name: Example
+#     directory: '/some/path/to/repo/docs/adr'
 #     template: '~/.config/adr/templates/default.tpl'`
 
-// The default template is a Go Template implementation of
+// DefaultTemplate is a Go Template implementation of
 // https://raw.githubusercontent.com/adr/madr/main/template/adr-template.md
-
 const DefaultTemplate = `---
 variables:
-    - name: VariableName
-      prompt: Prompt shown to user
-      default: default value  # Optional
-      validation:  # Optional
-        - operation: match
-          message: "Invalid pattern for VariableName"
-          args:
-          - '^[A-Z][A-Za-z0-9]+$'
-    - name: AnotherVariable
-      prompt: 'Enter another value:'
+#    Example variable declaration
+#    - name: Example # The name of the variable. Used in templates as {{ .VAR_NAME }}
+#      prompt: Prompt shown to user # The initial prompt shown to the user
+#      default: default value # Optional
+#      validation:  # Optional
+#        - operation: match # The name of the validation function
+#          message: "Invalid pattern for VariableName" # The message displayed on failure
+#          args: # An array of additional arguments supplied to the validator
+#          - '^[A-Z][A-Za-z0-9]+$'
+#      optional: false # Whether the variable is optional or not. Defaults to false
+#      repeat: # Whether the repeats or not. Used to build lists. Defaults to nil
+#        exitValue: '' # The value a user can enter to "exit" a repeated prompt.
+#        prompt: 'Repeated Prompt:' # A prompt shown on repeated prompts. If empty the variable prompts is shown.
+#        maxItems: 1 # Max number of items a list can contain
+#        minItems: 1 # Min number of items a list must contain
     - name: DecisionDrivers
       prompt: 'Please enter the initial decision driver:'
       optional: true
-      repeats: true
-      minItems: 1
-      repeatPrompt: 'Please enter an additional decision driver:'
-      exitValue: ''
+      repeat:
+        minItems: 1
+        prompt: 'Please enter an additional decision driver:'
+        exitValue: ''
     - name: ConsideredOptions
       prompt: 'Please enter a considered option:'
-      maxItems: 5
-      repeats: true
-      exitValue: ''
+      repeat:
+        maxItems: 5
+        exitValue: ''
 contents: |
     # {{ .Title }}
 

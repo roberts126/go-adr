@@ -9,45 +9,28 @@ import (
 
 func TestTemplate(t *testing.T) {
 	t.Run("TestDefaultTemplate", func(t *testing.T) {
-		dv := "default value"
 		truePtr := true
 		min := 1
 		max := 5
 
 		expected := Template{
 			data: nil,
-			Variables: []*Variables{
+			Variables: []*Variable{
 				{
-					Name:    "VariableName",
-					Prompt:  "Prompt shown to user",
-					Default: &dv,
-					Validation: []*Validation{
-						{
-							Operation: "match",
-							Args:      []string{"^[A-Z][A-Za-z0-9]+$"},
-							Message:   "Invalid pattern for VariableName",
-						},
+					Name:     "DecisionDrivers",
+					Prompt:   "Please enter the initial decision driver:",
+					Optional: &truePtr,
+					Repeat: &Repeat{
+						MinItems: &min,
+						Prompt:   "Please enter an additional decision driver:",
 					},
 				},
 				{
-					Name:   "AnotherVariable",
-					Prompt: "Enter another value:",
-				},
-				{
-					Name:         "DecisionDrivers",
-					Prompt:       "Please enter the initial decision driver:",
-					RepeatPrompt: "Please enter an additional decision driver:",
-					MinItems:     &min,
-					Optional:     &truePtr,
-					Repeats:      &truePtr,
-					ExitValue:    "",
-				},
-				{
-					Name:      "ConsideredOptions",
-					Prompt:    "Please enter a considered option:",
-					Repeats:   &truePtr,
-					ExitValue: "",
-					MaxItems:  &max,
+					Name:   "ConsideredOptions",
+					Prompt: "Please enter a considered option:",
+					Repeat: &Repeat{
+						MaxItems: &max,
+					},
 				},
 			},
 			Contents: `# {{ .Title }}
@@ -131,10 +114,23 @@ Links to other decisions and resources might here appear as well.}
 		if assert.NoError(t, yaml.Unmarshal([]byte(DefaultTemplate), &actual)) {
 			assert.Equal(t, expected.Contents, actual.Contents, "Template contents must match")
 
-			// Loop through the variables to identify failures more easily
-			for i := 0; i < len(expected.Variables); i++ {
-				val := expected.Variables[i]
-				assert.Equalf(t, expected.Variables[i], actual.Variables[i], "Template variable %s must match", val.Name)
+			expectedVars := make(map[string]*Variable, len(expected.Variables))
+			for _, v := range expected.Variables {
+				expectedVars[v.Name] = v
+			}
+
+			actualVars := make(map[string]*Variable, len(actual.Variables))
+			for _, v := range actual.Variables {
+				actualVars[v.Name] = v
+			}
+
+			// Loop through the variables to identify failures more easily and ensure completeness
+			for k, expectedVar := range expectedVars {
+				actualVar, ok := actualVars[k]
+
+				if assert.Truef(t, ok, "Actual variables must contain %s", k) {
+					assert.Equalf(t, expectedVar, actualVar, "Template variable %s must match", k)
+				}
 			}
 		}
 	})

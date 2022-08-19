@@ -1,14 +1,12 @@
 package cmd
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/roberts126/go-adr/adr"
 	"github.com/roberts126/go-adr/app"
-	"github.com/roberts126/go-adr/internal/env"
 	"github.com/roberts126/go-adr/internal/terminal"
 	"github.com/spf13/cobra"
 )
@@ -28,8 +26,7 @@ func initCommand() *cobra.Command {
 		Run:   h.handle,
 	}
 
-	usage := fmt.Sprintf(fmtEnvFlag, app.EnvConfigDir)
-	cmd.Flags().StringVarP(&h.path, "dir", "d", env.GetString(app.EnvConfigDir, ""), "The directory to create an adr in. Defaults to ${HOME}/.config/adr. "+usage)
+	addPathFlag(&h.path, cmd)
 
 	return cmd
 }
